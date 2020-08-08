@@ -65,25 +65,38 @@
 
 		<script id="example" type="x-shader/x-fragment">precision mediump float;
 
-#extension GL_OES_standard_derivatives : enable
-
-uniform float time;
-uniform vec2 mouse;
-uniform vec2 resolution;
-
-void main( void ) {
-
-	vec2 position = ( gl_FragCoord.xy / resolution.xy ) + mouse / 4.0;
-
-	float color = 0.0;
-	color += sin( position.x * cos( time / 15.0 ) * 80.0 ) + cos( position.y * cos( time / 15.0 ) * 10.0 );
-	color += sin( position.y * sin( time / 10.0 ) * 40.0 ) + cos( position.x * sin( time / 25.0 ) * 40.0 );
-	color += sin( position.x * sin( time / 5.0 ) * 10.0 ) + sin( position.y * sin( time / 35.0 ) * 80.0 );
-	color *= sin( time / 10.0 ) * 0.5;
-
-	gl_FragColor = vec4( vec3( color, color * 0.5, sin( color + time / 3.0 ) * 0.75 ), 1.0 );
-
-}</script>
+			#extension GL_OES_standard_derivatives : enable
+			
+			uniform float time;
+			uniform vec2 mouse;
+			uniform vec2 resolution;
+			uniform int waveform[1023];
+			
+			void main( void ) {
+			
+				vec2 position = ( gl_FragCoord.xy / resolution.xy ) + mouse / 4.0;
+				
+				if(gl_FragCoord.x < 1023.0) {
+					for(int i = 0; i < 1023; i++) {
+						if (i == int(gl_FragCoord.x)) {
+							if(int(gl_FragCoord.y) < (waveform[i] )) {
+								gl_FragColor = vec4(0, 1.0, 0, 1.0);
+							} else {
+								
+								gl_FragColor = vec4( 0, 0, 0, 1.0 );
+							}
+							break;
+						}
+					}
+					
+					
+				} else {
+					gl_FragColor = vec4(0, 0, 0, 1.0);	
+				}
+			
+				
+			
+			}</script>
 
 		<script id="fragmentShader" type="x-shader/x-fragment">
 
@@ -163,7 +176,14 @@ void main( void ) {
 			// Greetings to Iq/RGBA! ;)
 
 			var quality = 2, quality_levels = [ 0.5, 1, 2, 4, 8 ];
-			var toolbar, compileButton, fullscreenButton, compileTimer, errorLines = [];
+			var toolbar, compileButton, newSongButton, audioInput, audio = document.createElement( 'audio' ), fullscreenButton, compileTimer, errorLines = [];
+
+			var audioCtx = new (window.AudioContext || window.webkitAudioContext)(), source = audioCtx.createMediaElementSource(audio), analyser = audioCtx.createAnalyser();
+			analyser.fftSize = 2048;
+			var bufferLength = analyser.frequencyBinCount, dataArray = new Uint8Array(bufferLength);
+			source.connect(analyser).connect(audioCtx.destination);
+			analyser.getByteTimeDomainData(dataArray);
+
 			var code, canvas, gl, buffer, currentProgram, vertexPosition, screenVertexPosition, panButton,
 			parameters = { startTime: Date.now(), time: 0, mouseX: 0.5, mouseY: 0.5, screenWidth: 0, screenHeight: 0 },
 			surface = { centerX: 0, centerY: 0, width: 1, height: 1, isPanning: false, isZooming: false, lastX: 0, lastY: 0 },
@@ -281,6 +301,37 @@ void main( void ) {
 
 				}, false );
 				toolbar.appendChild( compileButton );
+
+				newSongButton = document.createElement( 'button' );
+				newSongButton.textContent = 'new song';
+				newSongButton.addEventListener( 'click', function( event ) {
+					audioInput.click();
+				}, false );
+				toolbar.appendChild(newSongButton);
+
+				audioInput = document.createElement( 'input' );
+				audioInput.type = "file";
+				audioInput.accept = "audio/*";
+				audioInput.addEventListener( 'change', function( event ) {
+					const reader = new FileReader();
+					reader.onload = function() {
+						audio.src = reader.result;
+						audioCtx.resume();
+						audio.play();
+					};
+					reader.readAsDataURL(event.target.files[0]);
+				}, false);
+
+				var audioContainer = document.createElement( 'div' );
+				audioContainer.style.display = 'inline-block';
+				audioContainer.style.maxHeight = '28px';
+				audioContainer.style.padding = '8px 12px';
+				audio.src = null;
+				audio.volume = 0.5;
+				audio.controls = true;
+				audio.style.maxHeight = '14px';
+				audioContainer.appendChild(audio);
+				toolbar.appendChild(audioContainer);
 
 				// from helper.js
 				add_server_buttons();
@@ -620,6 +671,7 @@ void main( void ) {
 				cacheUniformLocation( program, 'resolution' );
 				cacheUniformLocation( program, 'backbuffer' );
 				cacheUniformLocation( program, 'surfaceSize' );
+				cacheUniformLocation( program, 'waveform' );
 
 				// Load program into GPU
 
@@ -874,6 +926,8 @@ void main( void ) {
 
 				parameters.time = Date.now() - parameters.startTime;
 
+				analyser.getByteTimeDomainData(dataArray);
+
 				// Set uniforms for custom shader
 
 				gl.useProgram( currentProgram );
@@ -883,6 +937,7 @@ void main( void ) {
 				gl.uniform2f( currentProgram.uniformsCache[ 'resolution' ], parameters.screenWidth, parameters.screenHeight );
 				gl.uniform1i( currentProgram.uniformsCache[ 'backbuffer' ], 0 );
 				gl.uniform2f( currentProgram.uniformsCache[ 'surfaceSize' ], surface.width, surface.height );
+				gl.uniform1iv( currentProgram.uniformsCache[ 'waveform' ], dataArray );
 
 				gl.bindBuffer( gl.ARRAY_BUFFER, surface.buffer );
 				gl.vertexAttribPointer( surface.positionAttribute, 2, gl.FLOAT, false, 0, 0 );
