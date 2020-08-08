@@ -179,7 +179,7 @@
 			var toolbar, compileButton, newSongButton, audioInput, audio = document.createElement( 'audio' ), fullscreenButton, compileTimer, errorLines = [];
 
 			var audioCtx = new (window.AudioContext || window.webkitAudioContext)(), source = audioCtx.createMediaElementSource(audio), analyser = audioCtx.createAnalyser();
-			analyser.fftSize = 2048;
+			analyser.fftSize = 1024;
 			var bufferLength = analyser.frequencyBinCount, dataArray = new Uint8Array(bufferLength);
 			source.connect(analyser).connect(audioCtx.destination);
 			analyser.getByteTimeDomainData(dataArray);
@@ -667,7 +667,7 @@
 				// Cache uniforms
 
 				cacheUniformLocation( program, 'time' );
-				cacheUniformLocation( program, 'mouse' );
+				cacheUniformLocation( program, 'duration' );
 				cacheUniformLocation( program, 'resolution' );
 				cacheUniformLocation( program, 'backbuffer' );
 				cacheUniformLocation( program, 'surfaceSize' );
@@ -932,8 +932,8 @@
 
 				gl.useProgram( currentProgram );
 
-				gl.uniform1f( currentProgram.uniformsCache[ 'time' ], parameters.time / 1000 );
-				gl.uniform2f( currentProgram.uniformsCache[ 'mouse' ], parameters.mouseX, parameters.mouseY );
+				gl.uniform1f( currentProgram.uniformsCache[ 'time' ], audio.currentTime );
+				gl.uniform1f( currentProgram.uniformsCache[ 'duration' ], audio.duration );
 				gl.uniform2f( currentProgram.uniformsCache[ 'resolution' ], parameters.screenWidth, parameters.screenHeight );
 				gl.uniform1i( currentProgram.uniformsCache[ 'backbuffer' ], 0 );
 				gl.uniform2f( currentProgram.uniformsCache[ 'surfaceSize' ], surface.width, surface.height );
