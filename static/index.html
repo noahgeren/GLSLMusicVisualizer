@@ -68,33 +68,46 @@
 			#extension GL_OES_standard_derivatives : enable
 			
 			uniform float time;
+			uniform float duration;
 			uniform vec2 mouse;
 			uniform vec2 resolution;
-			uniform int waveform[1023];
+			uniform int waveform[512];
+			
+			int getWaveFormAtX( int x ) {
+				if(1.0 == mod(float(x), 2.0)) {
+					return 0;	
+				}
+				x = x / 2;
+				if(x < 256) {
+					for(int i = 0; i < 256; i++) {
+						if( i == x) {
+							return waveform[i];	
+						}
+					}	
+				} else {
+					for(int i = 511; i >= 256; i--) {
+						if( i == x) {
+							return waveform[i];	
+						}
+					}
+				}
+			}
 			
 			void main( void ) {
 			
-				vec2 position = ( gl_FragCoord.xy / resolution.xy ) + mouse / 4.0;
+				float x = 1023.0 / resolution.x * gl_FragCoord.x;
+				int waveFormAtX = getWaveFormAtX( int(x) );
 				
-				if(gl_FragCoord.x < 1023.0) {
-					for(int i = 0; i < 1023; i++) {
-						if (i == int(gl_FragCoord.x)) {
-							if(int(gl_FragCoord.y) < (waveform[i] )) {
-								gl_FragColor = vec4(0, 1.0, 0, 1.0);
-							} else {
-								
-								gl_FragColor = vec4( 0, 0, 0, 1.0 );
-							}
-							break;
-						}
-					}
-					
-					
+				float minY = (float(waveFormAtX) / 128.0 - 1.0) * (resolution.y / -2.0) + (resolution.y / 2.0);
+				float maxY = (float(waveFormAtX) / 128.0 - 1.0) * (resolution.y / 2.0) + (resolution.y / 2.0);
+				
+				float y = gl_FragCoord.y;
+				
+				if(y > minY && y < maxY) {
+					gl_FragColor = vec4(0.2, 0.6, abs(sin((time))), 1.0);
 				} else {
-					gl_FragColor = vec4(0, 0, 0, 1.0);	
+					gl_FragColor = vec4(0, 0, 0, 1.0);
 				}
-			
-				
 			
 			}</script>
 
@@ -176,7 +189,7 @@
 			// Greetings to Iq/RGBA! ;)
 
 			var quality = 2, quality_levels = [ 0.5, 1, 2, 4, 8 ];
-			var toolbar, compileButton, newSongButton, audioInput, audio = document.createElement( 'audio' ), fullscreenButton, compileTimer, errorLines = [];
+			var toolbar, compileButton, newSongSelect, audioInput, audio = document.createElement( 'audio' ), fullscreenButton, compileTimer, errorLines = [];
 
 			var audioCtx = new (window.AudioContext || window.webkitAudioContext)(), source = audioCtx.createMediaElementSource(audio), analyser = audioCtx.createAnalyser();
 			analyser.fftSize = 1024;
@@ -302,12 +315,29 @@
 				}, false );
 				toolbar.appendChild( compileButton );
 
-				newSongButton = document.createElement( 'button' );
-				newSongButton.textContent = 'new song';
-				newSongButton.addEventListener( 'click', function( event ) {
-					audioInput.click();
+
+				const options = [ 'new song', 'from file', 'from YouTube' ];
+				newSongSelect = document.createElement( 'select' );
+				newSongSelect.addEventListener( 'change' , function( event ) {
+					if(event.target.value === options[1]) {
+						audioInput.click();
+					} else if (event.target.value === options[2]) {
+						prompt("Enter the video url:");
+					}
+					newSongSelect.value = options[0];
 				}, false );
-				toolbar.appendChild(newSongButton);
+
+				
+				for(const option of options) {
+					var optionEl = document.createElement( 'option' );
+					optionEl.textContent = option;
+					if(option === 'new song') {
+						optionEl.selected = true;
+					}
+					newSongSelect.appendChild( optionEl );
+				}
+
+				toolbar.appendChild( newSongSelect );
 
 				audioInput = document.createElement( 'input' );
 				audioInput.type = "file";
@@ -668,6 +698,7 @@
 
 				cacheUniformLocation( program, 'time' );
 				cacheUniformLocation( program, 'duration' );
+				cacheUniformLocation( program, 'mouse' );
 				cacheUniformLocation( program, 'resolution' );
 				cacheUniformLocation( program, 'backbuffer' );
 				cacheUniformLocation( program, 'surfaceSize' );
@@ -934,6 +965,7 @@
 
 				gl.uniform1f( currentProgram.uniformsCache[ 'time' ], audio.currentTime );
 				gl.uniform1f( currentProgram.uniformsCache[ 'duration' ], audio.duration );
+				gl.uniform2f( currentProgram.uniformsCache[ 'mouse' ], parameters.mouseX, parameters.mouseY )
 				gl.uniform2f( currentProgram.uniformsCache[ 'resolution' ], parameters.screenWidth, parameters.screenHeight );
 				gl.uniform1i( currentProgram.uniformsCache[ 'backbuffer' ], 0 );
 				gl.uniform2f( currentProgram.uniformsCache[ 'surfaceSize' ], surface.width, surface.height );
