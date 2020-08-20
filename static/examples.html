@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>GLSL Music Visualizer</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+		<style>
+
+			body {
+
+				background-color: #000000;
+				margin: 1rem 10vw;
+				padding: 0;
+				overflow: hidden;
+                color: #fff;
+                font-family: Monospace;
+			}
+
+			a, a:visited {
+
+				padding: 8px 12px 8px 12px;
+
+				border: none;
+				border-radius: 5px;
+
+				color: #ffffff;
+				background-color: #000000;
+				opacity: 0.5;
+
+				font-family: Monospace;
+				font-size: 12px;
+				font-weight: bold;
+
+				cursor: pointer;
+				text-decoration: none;
+
+			}
+
+			a:hover {
+
+				opacity: 1;
+				box-shadow: 0 0 4px #FFF;
+
+			}
+
+
+            .row {
+                display: flex;
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .example {
+                display: inline-block;
+                text-align: center;
+                border: 1px solid #fff;
+                width: 250px;
+                padding: 1.5rem;
+                margin: 0.5rem;
+            }
+
+            .example img {
+                margin-bottom: 1rem;
+            }
+
+            h1 {
+                display: inline-block;
+                width: 100%;
+                text-align: center;
+                font-size: 2.5rem;
+            }
+        </style>
+        <link rel="stylesheet" href="css/default.css">
+	</head>
+	<body>
+        <div>
+            <a href="/" style="position:absolute">&larr; Back</a>
+            <h1>Examples</h1>
+        </div>
+        <div class="row">
+            <a class="example" href="/#A/5d00000100a00400000000000000381c88cdaf8125d4569ed1e6e6c09c2fe72b7d489ad9d27ce026c1d90b38e6a986e7c482f98001c7d016ca8db7da32debe67fc602659f4e96ae150d75ea26ae8e8f4056e0b845d0814a2acee3a47ec45af66fb262b03d227e07b5f66a53808b9aee4d95818d97807537e617ce9f7c2b406ca63cc0fc644ff05ca878f851033f9ed4f05b05a345d1946e1cbbc3c46f8b611df139ebafa9d42989b3e289b64881cb886a11abb713e063aeee514db8ad3b5188d8b3c67a550da7622f4e95b2cc563f3a0a5240f84ad3c4e81709aa69d586323b419dc0021989c2d798759a319400ff84260e5d954bc6812dbe3b17d7740ad28f8035641e9b96097491d85a4e0b1298a37edc64d8025b6d6c9bd716c98240d0d9b15dba79e29527f8ee8e999abd49a4a48d5b25dde59582490912e6982fd2d6529697f4b12fd0ff42b77823dd4a4ab3be4bf247873e33883e98a95bae8538903c8d0f15838e6165f54c091b7c414146cf1d5ea9b1ea97e972130dadff61d0bc5b2dae8832e186579cf7d68866f2c8e55f1c8eabd5313a72c20f01d73f7f954c491c43ce305b5b6de63b0783330d0dffad2f2e5309f2d86bd599f9e6b8ff11cd0ae81989cfa4ee6e8b81b5e291d203118afe41edb6449fffbe49263938a15d68e670389d201ee2f97ddea1c3afb7e9213c4c0031f1556540abcb876a58a6e4bbea8b54c21ef9b2417405c3a661c7b470dbde61d5c499a3b8b0a9e69144232fbfef5a64d8b">
+                <img src="/img/rainbow-waveform.png" />
+                <div>Rainbow Waveform</div>
+            </a>
+            <a class="example" href="/#A/5d00000100900500000000000000381c88cdaf8125d4569ed1e6e6c09c2fe72b7d489ad9d27ce026c1d90b38e6a986e7c482f98001c7d016ca8db7da32debe67fc602659f4e96ae150d75ea26ae8e8f4056e0b845d0814a2acee3a47ec45af66fb262b03d227e07b5f66a53808b9aee4d95818d97807537e617ce9f7c2b406ca63cc0fc644ff05ca878f851033f9ed4f05b05a345d1946e1cbbc3c46f8b611df139ebafa9d42989b3e289b64881cb886a11abb713e063aeee514db8ad3b5188d8b3c67a550da7622f4e95b2cc563f915a8bbaa638ff02348ee5d0949b679df6ca72be12d420845e301b30773c00521d8d700f795a1c5a572f8d71663878cc9f1e64e7b0aafd62f422809521b0369dc7ee326d13713a7490f6c9109b2a994b1915142ee8738b23cd6f3565f6cb1adaae0babf4b0a1f33e7c07a80b570df42d549ca1d7fa956e926417fbbf6c8c5c231341dcaafaa3c5b2578709ad2942bc6133709a638c9aad0cb13156ffeef27fb391b212b8dad9367bc9175ba4a92cbd291f53404bad2fd4317f7399f4867d7cc6090567aa372094c59795a097216e6b07d942cc5f6fb59936771afb3a2cf4a6e08b813fb643e4eeaf69933b00371db15777f6d73f3ffac91a479d800f0fb081f9f77aba4aa190c9cdc83993cbc9e71436d9caf9ab233be818ffdb5d4f4a178a49f4e2bea2fb90b06869e6c6638f2b6c54dbdcb3541da19a3360c62a95ad11887dc76cbea2323cb8ca6d7296e940a702b4ad149b1f7ada46de14e8c59237be378876bc8d2a0e08e909933213402365d20728bd2d9de3204bdf042da02d664d6a546d62d636acdcd130f5523ebc564a47496a5d1055d66e3f8456ba52c6edfa502c9a6449a41c7179a9fbbf08ee21978774792652f5a95e01622858c0357ffec3b6dfc">
+                <img src="/img/circle-waveform.png" />
+                <div>Rainbow Circle Waveform</div>
+            </a>
+        </div>
+    </body>
+</html>

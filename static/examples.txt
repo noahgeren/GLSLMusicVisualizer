@@ -1,0 +1,137 @@
+Rainbow:
+void main( void ) {
+
+	float x = 1023.0 / resolution.x * gl_FragCoord.x;
+	int waveFormAtX = getWaveFormAtX( int(x) );
+	
+	float minY = (float(waveFormAtX) / 128.0 - 1.0) * (resolution.y / -2.0) + (resolution.y / 2.0);
+	float maxY = (float(waveFormAtX) / 128.0 - 1.0) * (resolution.y / 2.0) + (resolution.y / 2.0);
+	
+	float y = gl_FragCoord.y;
+	
+	if(y > minY && y < maxY) {
+		gl_FragColor = vec4(gl_FragCoord.x / resolution.x, 1.0 - gl_FragCoord.x / resolution.x, abs(sin((time))), 1.0);
+	} else {
+		gl_FragColor = vec4(0, 0, 0, 1.0);
+	}
+
+}
+
+
+Julia set:
+vec2 complex_square(vec2 v) {
+	return vec2(v.x * v.x - v.y * v.y, v.x * v.y * 2.0);	
+}
+
+void main( void ) {
+	
+	const int i_max = 2555;
+	vec2 c = vec2(-0.12256, 0.74486);
+	float er2 = 4.0;
+	
+	vec2 z = gl_FragCoord.xy - resolution.xy * 0.5;
+	z *= 2.5 / min(resolution.x, resolution.y);
+	
+	float scale = 0.1;
+	int count = 0;
+	
+	for(int i = 0; i < i_max; i++) {
+		z = c + complex_square(z);
+		count = i;
+		if(dot(z, z) > er2) break;
+	}
+	if(count == i_max - 1) {
+		gl_FragColor = vec4(1.0, 0, 0, 1.0);	
+	} else {
+		gl_FragColor = vec4(1.0 - float(count) * scale);	
+	}
+
+}
+
+Mandelbrot set:
+void main( void ) {
+	vec2 c = gl_FragCoord.xy / resolution.xy;
+	c = c * vec2(4, 3) - vec2(2.5, 1.5);
+	vec2 z = vec2(0);
+	gl_FragColor = vec4(0);
+	for(int i = 0; i < 1000; i++) {
+		if(z.x * z.x + z.y * z.y >= 4.0) {
+			gl_FragColor = vec4(1);
+			break;
+		}
+		z = vec2(z.x*z.x - z.y*z.y, 2.0 * z.x * z.y) + c;
+	}
+}
+
+Colored mandelbrot set:
+void main( void ) {
+	float e = 100.0;
+	vec2 c = vec2((gl_FragCoord.x - resolution.x / 2.0)/resolution.y, (gl_FragCoord.y - resolution.y / 2.0)/resolution.y);
+	c*=2.5;
+	int ic=0;
+	vec2 tz;
+	vec2 z = vec2(0.0);
+	for(int i = 0; i< 32; i++) {
+		if(length(z) < e) {
+			tz = z;
+			z.x = tz.x*tz.x-z.y*tz.y+c.x;
+			z.y = 2.0 * tz.x*tz.y+c.y;
+			ic++;
+		}
+	}
+	float m = float(ic) - (log(log(length(z))))/log(2.0);
+	gl_FragColor = vec4(abs(sin(m / 5.0)));
+}
+
+Mandelbrot zoom:
+void main( void ) {
+
+	float n = 0.;
+	vec2 c = vec2(-.745, .186) + 3. * (gl_FragCoord.xy/resolution.y -.5)*pow(0.01,  time / duration * 2.0);
+	vec2 z = c * n;
+	for(int i = 0; i < 1024; i++) {
+		z = vec2(z.x*z.x - z.y*z.y, 2.*z.x*z.y) + c;
+		if(dot(z, z) > 1e4) break;
+		n++;
+	}
+	gl_FragColor = .5 + .5 * cos(vec4(3, 4, 11, 0) + 0.05*(n - log2(log2(dot(z, z)))));
+}
+
+
+Circle
+int getWaveFormAtX( int x ) {
+	if(1.0 == mod(float(x), 2.0)) {
+		return 128;	
+	}
+	x = x / 2;
+	if(x < 256) {
+		for(int i = 0; i < 256; i++) {
+			if( i == x) {
+				return waveform[i];	
+			}
+		}	
+	} else {
+		for(int i = 511; i >= 256; i--) {
+			if( i == x) {
+				return waveform[i];	
+			}
+		}
+	}
+}
+
+void main( void ) {
+	
+	gl_FragColor = vec4(0, 0, 0, 1.0);
+
+	if(length(resolution.xy / 2.0 - gl_FragCoord.xy) < 250.0) {
+		gl_FragColor = vec4(0, 0, 0, 1.0);
+	}
+	
+	int x = int((atan((gl_FragCoord.y - resolution.y / 2.0) / (gl_FragCoord.x - resolution.x / 2.0)) * 2.0 + 3.1415926 ) / (2.0 * 3.1415926) * 1023.0);
+	float waveformAtX = (1. - float(getWaveFormAtX(x)) / 128.0) * 500.0;
+	
+	if(length(resolution.xy / 2.0 - gl_FragCoord.xy) < 250.0 + float(waveformAtX) && length(resolution.xy / 2.0 - gl_FragCoord.xy) > 250.0) {
+		gl_FragColor = vec4(sin(time), 1.0 - sin(time), cos(time), 1.0);
+	}
+
+}

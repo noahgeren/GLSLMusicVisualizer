@@ -95,6 +95,8 @@
 			}
 			
 			void main( void ) {
+				
+				const vec3 a = vec3(0.5, 0.5, 0.5), b= vec3(0.5, 0.5, 0.5), c= vec3(1.0, 1.0, 1.0), d= vec3(0.00, 0.33, 0.67);
 			
 				float x = 511.0 / resolution.x * gl_FragCoord.x;
 				int waveFormAtX = getWaveFormAtX( int(x) );
@@ -105,7 +107,7 @@
 				float y = gl_FragCoord.y;
 				
 				if(y > minY && y < maxY) {
-					gl_FragColor = vec4(0.2, 0.6, abs(sin((time))), 1.0);
+					gl_FragColor = vec4(a + b*cos( 6.28318*(c*(mod(gl_FragCoord.x + time * resolution.x / 4., resolution.x) / resolution.x)+d) ), 1.0);
 				} else {
 					gl_FragColor = vec4(0, 0, 0, 1.0);
 				}
@@ -190,7 +192,7 @@
 			// Greetings to Iq/RGBA! ;)
 
 			var quality = 1, quality_levels = [ 0.5, 1, 2, 4, 8 ];
-			var toolbar, compileButton, newSongSelect, audioInput, audio = document.createElement( 'audio' ), fullscreenButton, compileTimer, errorLines = [];
+			var toolbar, compileButton, newSongButton, audioInput, audio = document.createElement( 'audio' ), fullscreenButton, compileTimer, errorLines = [];
 
 			var audioCtx = new (window.AudioContext || window.webkitAudioContext)(), source = audioCtx.createMediaElementSource(audio), analyser = audioCtx.createAnalyser();
 			analyser.fftSize = 512;
@@ -257,10 +259,23 @@
 
 				rightside.appendChild( fullscreenButton );
 
-				var button = document.createElement( 'a' );
-				button.textContent = 'gallery';
-				button.href = '/';
-				rightside.appendChild( button );
+				var examplesButton = document.createElement( 'a' );
+				examplesButton.textContent = 'examples';
+				examplesButton.href = '/examples.html';
+				rightside.appendChild( examplesButton );
+
+				var resetButton = document.createElement( 'a' );
+				resetButton.textContent = 'reset';
+				let startingUrl = window.location.href;
+				resetButton.onclick = function(e) {
+					e.preventDefault();
+					if(confirm("Are you sure you want to reset this shader?")) {
+						window.location.href = startingUrl;
+						load_url_code();
+					} 
+				};
+				resetButton.href = '/reset';
+				rightside.appendChild( resetButton );
 
 				var button = document.createElement( 'button' );
 				button.textContent = 'hide code';
@@ -317,29 +332,13 @@
 				}, false );
 				toolbar.appendChild( compileButton );
 
-
-				const options = [ 'new song', 'from file', 'from YouTube' ];
-				newSongSelect = document.createElement( 'select' );
-				newSongSelect.addEventListener( 'change' , function( event ) {
-					if(event.target.value === options[1]) {
-						audioInput.click();
-					} else if (event.target.value === options[2]) {
-						prompt("Enter the video url:");
-					}
-					newSongSelect.value = options[0];
+				newSongButton = document.createElement( 'button' );
+				newSongButton.textContent = 'select song';
+				newSongButton.addEventListener( 'click' , function( ) {
+					audioInput.click();
 				}, false );
 
-				
-				for(const option of options) {
-					var optionEl = document.createElement( 'option' );
-					optionEl.textContent = option;
-					if(option === 'new song') {
-						optionEl.selected = true;
-					}
-					newSongSelect.appendChild( optionEl );
-				}
-
-				toolbar.appendChild( newSongSelect );
+				toolbar.appendChild( newSongButton );
 
 				audioInput = document.createElement( 'input' );
 				audioInput.type = "file";
